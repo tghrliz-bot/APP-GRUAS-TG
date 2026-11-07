@@ -1,0 +1,6 @@
+{
+  "name": "TG MOVIMIENTOS DE GRUA",
+  "description": "A web application for logging container crane movements, designed to work both online and offline. It allows operators to log their daily shifts, track container movements, manage equipment changes, and view efficiency metrics. Administrators can search for specific containers and export detailed reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

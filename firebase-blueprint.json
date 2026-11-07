@@ -1,0 +1,153 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user roles and profile information.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "operator"] },
+        "displayName": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    },
+    "AppConfig": {
+      "title": "Application Configuration",
+      "description": "Stores shared configuration values like operators, cranes, yards, etc.",
+      "type": "object",
+      "properties": {
+        "values": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Session": {
+      "title": "Work Session",
+      "description": "Represents an operator's work shift.",
+      "type": "object",
+      "properties": {
+        "operator": { "type": "string" },
+        "shift": { "type": "string" },
+        "workType": { "type": "string" },
+        "client": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CraneUsage": {
+      "title": "Crane Usage Record",
+      "description": "Tracks usage of a specific crane within a session.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "crane": { "type": "string" },
+        "yard": { "type": "string" },
+        "startHourMeter": { "type": "number" },
+        "endHourMeter": { "type": "number" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "changeReason": { "type": "string" },
+        "changeReasonDetails": { "type": "string" }
+      }
+    },
+    "Movement": {
+      "title": "Container Movement",
+      "description": "Logs a single container movement.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "craneUsageId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "client": { "type": "string" },
+        "containerNumber": { "type": "string" },
+        "reason": { "type": "string" },
+        "yard": { "type": "string" },
+        "crane": { "type": "string" },
+        "operator": { "type": "string" }
+      }
+    },
+    "WorkshopRecord": {
+      "title": "Workshop Record",
+      "description": "Logs a mechanical failure or workshop entry.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "craneUsageId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "crane": { "type": "string" },
+        "details": { "type": "string" }
+      }
+    },
+    "CraneInspection": {
+      "title": "Crane Pre-Inspection",
+      "description": "Logs checklist items evaluated before using a crane.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "number" },
+        "craneUsageId": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "crane": { "type": "string" },
+        "operator": { "type": "string" },
+        "frenos": { "type": "number" },
+        "frenoEstacionamiento": { "type": "number" },
+        "alarmasBocina": { "type": "number" },
+        "llantaDelanteraIzqExt": { "type": "number" },
+        "llantaDelanteraIzqInt": { "type": "number" },
+        "llantaDelanteraDerExt": { "type": "number" },
+        "llantaDelanteraDerInt": { "type": "number" },
+        "llantaTraseraIzquierda": { "type": "number" },
+        "llantaTraseraDerecha": { "type": "number" },
+        "fugaDetectada": { "type": "string" },
+        "tipoFuga": { "type": "string" },
+        "ubicacionFuga": { "type": "string" },
+        "otroDetalleFuga": { "type": "string" },
+        "boom": { "type": "number" },
+        "spreader": { "type": "number" },
+        "sideShift": { "type": "number" },
+        "lucesTrabajo": { "type": "number" },
+        "luzSemaforo": { "type": "number" },
+        "direccionales": { "type": "number" },
+        "lucesFreno": { "type": "number" },
+        "lucesFrontales": { "type": "number" },
+        "fajas": { "type": "number" },
+        "tornamesa": { "type": "number" },
+        "manguerasVisibles": { "type": "number" },
+        "ac": { "type": "number" },
+        "abanicos": { "type": "number" },
+        "asiento": { "type": "number" },
+        "parabrisas": { "type": "number" },
+        "radio": { "type": "number" }
+      }
+    },
+    "CraneFailure": {
+      "title": "Crane Failure",
+      "description": "Mechanical or operational failure report for cranes.",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "number" },
+        "craneUsageId": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "firstReportedAt": { "type": "string", "format": "date-time" },
+        "resolvedAt": { "type": "string", "format": "date-time" },
+        "crane": { "type": "string" },
+        "operator": { "type": "string" },
+        "itemKey": { "type": "string" },
+        "itemLabel": { "type": "string" },
+        "score": { "type": "number" },
+        "severity": { "type": "string", "enum": ["Menor", "Mayor", "Crítico"] },
+        "status": { "type": "string", "enum": ["Pendiente", "En Reparación", "Resuelto", "Requiere Compra", "No Reparado"] },
+        "mechanicNotes": { "type": "string" },
+        "resolvedBy": { "type": "string" },
+        "justification": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles and roles." },
+    "/appConfig/{configKey}": { "schema": "AppConfig", "description": "Shared system configuration." },
+    "/sessions/{sessionId}": { "schema": "Session", "description": "Work sessions." },
+    "/craneUsages/{usageId}": { "schema": "CraneUsage", "description": "Crane usage records." },
+    "/movements/{movementId}": { "schema": "Movement", "description": "Container movements." },
+    "/workshopRecords/{recordId}": { "schema": "WorkshopRecord", "description": "Workshop/failure records." },
+    "/craneInspections/{inspectionId}": { "schema": "CraneInspection", "description": "Mandatory crane checklists." },
+    "/craneFailures/{failureId}": { "schema": "CraneFailure", "description": "Crane failure issues and maintenance state." }
+  }
+}

@@ -1,0 +1,144 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: appConfig
+// Document ID: configKey (e.g., 'OPERATORS', 'CRANES')
+// Fields:
+//   - values: list of strings (required)
+//
+// Collection: sessions
+// Document ID: sessionId (string)
+// Fields:
+//   - operator: string (required)
+//   - shift: string (required)
+//   - workType: string (required)
+//   - client: string (optional)
+//   - startTime: timestamp (required)
+//   - endTime: timestamp (optional)
+//
+// Collection: craneUsages
+// Document ID: usageId (string)
+// Fields:
+//   - sessionId: string (required)
+//   - crane: string (required)
+//   - yard: string (required)
+//   - startHourMeter: number (required)
+//   - endHourMeter: number (optional)
+//   - startTime: timestamp (required)
+//   - endTime: timestamp (optional)
+//   - changeReason: string (optional)
+//   - changeReasonDetails: string (optional)
+//
+// Collection: movements
+// Document ID: movementId (string)
+// Fields:
+//   - sessionId: string (required)
+//   - craneUsageId: string (required)
+//   - timestamp: timestamp (required)
+//   - client: string (optional)
+//   - containerNumber: string (optional)
+//   - reason: string (optional)
+//   - yard: string (required)
+//   - crane: string (required)
+//   - operator: string (required)
+//
+// Collection: workshopRecords
+// Document ID: recordId (string)
+// Fields:
+//   - sessionId: string (required)
+//   - craneUsageId: string (required)
+//   - timestamp: timestamp (required)
+//   - crane: string (required)
+//   - details: string (required)
+//
+// Collection: users
+// Document ID: userId (string)
+// Fields:
+//   - email: string (required)
+//   - role: string (required, 'admin' | 'operator')
+//   - displayName: string (optional)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "rfonseca047@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /test/connection {
+      allow read: if true;
+    }
+
+    match /appConfig/{configKey} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == userId) && request.resource.data.role == 'operator';
+      allow update: if isAdmin();
+    }
+
+    match /sessions/{sessionId} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /craneUsages/{usageId} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /movements/{movementId} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /workshopRecords/{recordId} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /craneInspections/{inspectionId} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /craneFailures/{failureId} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
